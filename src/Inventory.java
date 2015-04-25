@@ -1,6 +1,7 @@
 /**
  * @author Matthew Meyer
  */
+package softeng;
 public class Inventory {
 
     private int id;

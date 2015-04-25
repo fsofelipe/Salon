@@ -1,4 +1,4 @@
-//package softeng;
+package softeng;
 import java.text.*;
 import java.util.*;
 
@@ -39,5 +39,12 @@ public class Financial {
        //System.out.println(result);
         
         return result;
+    }
+    
+    public Date makeDate (int day, int month, int year){ //dd-mm-yyyy
+        int auxYear;
+        auxYear = year - 2000 + 100;
+        Date a = new Date(auxYear, month - 1, day);
+        return a;
     }
 }

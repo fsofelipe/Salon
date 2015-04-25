@@ -1,6 +1,7 @@
 /**
  * @author Matthew Meyer
  */
+package softeng;
 public class Employee extends Person {
 
     private int salary;

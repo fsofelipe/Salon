@@ -1,10 +1,10 @@
 /**
  * @author Matthew Meyer
  */
-//package softeng;
+package softeng;
 import java.sql.*;
 import java.util.ArrayList;
-
+import java.util.Date;
 public class DatabaseManager {
 
     private final static String DatabaseDriver = "org.sqlite.JDBC";
@@ -333,22 +333,27 @@ public class DatabaseManager {
         AddService(item2);
     }
     //AUX
-    public static int getLastID(String table) {
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public static float ValuePeriod (String table, String attribute, String attribute2, Date start, Date end){
+        float result = 0;
         Connection c = null;
         Statement stmt = null;
-        int teste = -1;
         try {
-            Class.forName(DatabaseDriver);
-            c = DriverManager.getConnection(SalonDatabase);
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:Salon.db");
             c.setAutoCommit(false);
             try {
+
                 stmt = c.createStatement();
-                String sql = "SELECT 'ID'FROM " + table;
-                ResultSet rs = stmt.executeQuery(sql);
-                while (rs.next()){
-                    teste = rs.getInt(1);
+                
+                ResultSet rs = stmt.executeQuery("SELECT "+ attribute2 +" FROM " + table + " WHERE "+ attribute + " >= " + start.getTime() +" AND " + attribute + " < "+ end.getTime());
                     
+                while (rs.next()) {
+                    result+=rs.getFloat(attribute2);
                 }
+
+
                 rs.close();
                 stmt.close();
             } catch (SQLException E) {
@@ -360,11 +365,107 @@ public class DatabaseManager {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        return teste;   
-                
+        return result;
     }
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
+    public static Date getMinDate (String table, String attribute){
+        Date result=new Date(1,1,2014);
+       
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:Salon.db");
+            c.setAutoCommit(false);
+            try {
+
+                stmt = c.createStatement();
+                
+                ResultSet rs = stmt.executeQuery("SELECT MIN("+ attribute +") FROM "+ table);
+                    
+                while (rs.next()) {
+                    result=rs.getDate("MIN("+attribute+")");
+                }
+
+
+                rs.close();
+                stmt.close();
+            } catch (SQLException E) {
+                E.printStackTrace();
+            }
+            c.close();
+        } catch (SQLException E) {
+            E.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+    public static Date getMaxDate (String table, String attribute){
+        Date result=new Date(1,1,2014);
+       
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:Salon.db");
+            c.setAutoCommit(false);
+            try {
+
+                stmt = c.createStatement();
+                
+                ResultSet rs = stmt.executeQuery("SELECT MAX("+ attribute +") FROM "+ table);
+                    
+                while (rs.next()) {
+                    result=rs.getDate("MAX("+attribute+")");
+                }
+
+
+                rs.close();
+                stmt.close();
+            } catch (SQLException E) {
+                E.printStackTrace();
+            }
+            c.close();
+        } catch (SQLException E) {
+            E.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+    
+    public static float getValueCategory (String table, String attribute, String attribute2, String item, Date start, Date end){
+        float result = 0;
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:Salon.db");
+            c.setAutoCommit(false);
+            try {
+
+                stmt = c.createStatement();
+                ResultSet rs = stmt.executeQuery("SELECT "+ attribute + " FROM " + table + " WHERE " + attribute2 + " = '" + item +"' AND DATE >= " + start.getTime() +" AND DATE < "+ end.getTime());
+                    
+                while (rs.next()) {
+                    result+=rs.getFloat(attribute);
+                }
+
+
+                rs.close();
+                stmt.close();
+            } catch (SQLException E) {
+                E.printStackTrace();
+            }
+            c.close();
+        } catch (SQLException E) {
+            E.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
     
     private static void Add(String values, String table) {
         Connection c = null;
@@ -406,6 +507,7 @@ public class DatabaseManager {
             c = DriverManager.getConnection(SalonDatabase);
             c.setAutoCommit(false);
             try {
+
                 stmt = c.createStatement();
                 String sql = "SELECT * FROM " + table + selector;
                 ResultSet rs = stmt.executeQuery(sql);
@@ -481,6 +583,16 @@ public class DatabaseManager {
                         tableItems.add(obj);
                     }
                 }
+                else if (obj instanceof Service) {
+                    while (rs.next()) {
+                        ((Service) obj).setID(rs.getInt("ID"));                        
+                        ((Service) obj).setName(rs.getString("NAME"));                        
+                        ((Service) obj).setDescription(rs.getString("DESCRIPTION"));      
+                        ((Service) obj).setValue(rs.getFloat("VALUE"));
+                                                
+                        tableItems.add(obj);
+                    }
+                }
                 rs.close();
                 stmt.close();
             } catch (SQLException E) {
@@ -495,6 +607,7 @@ public class DatabaseManager {
         return tableItems;
     }
 
+   
     private static <T> void Delete(T obj, String table) {
         String ID = "";
         if (obj instanceof Employee) {

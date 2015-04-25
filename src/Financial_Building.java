@@ -1,4 +1,4 @@
-//package softeng;
+package softeng;
 
 import java.text.*;
 import java.util.*;
@@ -21,7 +21,7 @@ public class Financial_Building extends Financial{
         this.category = category;
         this.dateDue = dateDue;
         this.datePayment = getTodaysDate();
-        ID = 0;
+        ID = 1;
         this.percentage = percentage;
         calculeOverdue();
         calculeValueTotal();
@@ -95,9 +95,7 @@ public class Financial_Building extends Financial{
             valueOverdue = getOverdue(percentage, dateDue, value);
         }
     }
-    
-    
-    
+  
     @Override
     public String toString() {
         return Integer.toString(ID) + "," + category + "," + dateDue.toString() + "," + datePayment.toString()  + "," 
@@ -115,4 +113,6 @@ public class Financial_Building extends Financial{
     public boolean equals(Object obj) {
         return (obj instanceof Financial_Building && toString().equals(obj.toString()));
     }
+    
+    
 }
