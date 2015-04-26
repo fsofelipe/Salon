@@ -331,12 +331,66 @@ public class DatabaseManager {
     public static void RemoveClient(Person item) {
         Delete(item, ClientTable);
     }
-    public static void UpdateClient(Service item, Service item2) {
-        RemoveService(item);
-        AddService(item2);
+    public static void UpdateClient(Person item, Person item2) {
+        RemoveClient(item);
+        AddClient(item2);
+    }
+    
+        //SUPPLIER
+    public static ArrayList<Supplier> LookupSupplier(int attr, String field) {
+        return LookupSupplier(Integer.toString(attr), field);
+    }
+    public static ArrayList<Supplier> LookupSupplier(String attribute, String field) {
+       return Get(attribute, field, SupplierTable, new Supplier());    
+    }
+    public static ArrayList<Supplier> AllSupplier() {
+        return LookupSupplier("","");
+    }
+    public static void AddSupplier(Supplier product) {
+        Add(product.toString(), SupplierTable);
+    }
+    public static void RemoveSupplier(Supplier item) {
+        Delete(item, SupplierTable);
+    }
+    public static void UpdateSupplier(Supplier item, Supplier item2) {
+        RemoveSupplier(item);
+        AddSupplier(item2);
     }
     //AUX
+        public static int getIDperson(String table, String firstName, String lastName){
+        int result = 0;
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:Salon.db");
+            c.setAutoCommit(false);
+            try {
 
+                stmt = c.createStatement();
+                
+                ResultSet rs = stmt.executeQuery("SELECT ID FROM " + table + " WHERE FIRST_NAME = '" + firstName + "' AND LAST_NAME = '" + lastName + "'");
+                    
+                while (rs.next()) {
+                    result+=rs.getInt("ID");
+                }
+
+
+                rs.close();
+                stmt.close();
+            } catch (SQLException E) {
+                E.printStackTrace();
+            }
+            c.close();
+        } catch (SQLException E) {
+            E.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return result;
+        
+        
+    }
     public static int getQuantLines(String table){
         int result = 0;
         Connection c = null;
@@ -630,6 +684,19 @@ public class DatabaseManager {
                         tableItems.add(obj);
                     }
                 }
+                else if (obj instanceof Supplier) {
+                    while (rs.next()) {
+                        ((Supplier) obj).setID(rs.getInt("ID"));                        
+                        ((Supplier) obj).setName(rs.getString("NAME"));                        
+                        ((Supplier) obj).setAddress(rs.getString("ADDRESS"));
+                        ((Supplier) obj).setCity(rs.getString("CITY"));
+                        ((Supplier) obj).setState(rs.getString("STATE"));
+                        ((Supplier) obj).setPhone(rs.getString("PHONE"));
+                        ((Supplier) obj).setEmail(rs.getString("EMAIL"));
+                                                
+                        tableItems.add(obj);
+                    }
+                }
                 rs.close();
                 stmt.close();
             } catch (SQLException E) {
@@ -664,6 +731,12 @@ public class DatabaseManager {
         }
         else if (obj instanceof Financial_Sales) {
             ID = Integer.toString(((Financial_Sales) obj).getID());
+        }
+        else if (obj instanceof Supplier) {
+            ID = Integer.toString(((Supplier) obj).getID());
+        }
+        else if (obj instanceof Person) {
+            ID = Integer.toString(((Person) obj).getId());
         }
         if (ID.isEmpty()) return;
         Connection c = null;

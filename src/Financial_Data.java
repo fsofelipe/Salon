@@ -11,13 +11,19 @@ import java.util.Date;
  * @author Felipe
  */
 public class Financial_Data extends Financial{
+    //SCREEN 1
     private float financialBuildingTotalMonth, financialEmployeeTotalMonth, financialSupplierTotalMonth;
     private float monthBalance, monthExpense, monthIncome;
     private float monthPaymentType[] = new float[3];
     
+    //SCREEN 2
     private float financialBuildingTotalPeriod, financialEmployeeTotalPeriod, financialSupplierTotalPeriod;
     private float periodExpense;
 
+    //SCREEN 3
+    private float incomeCreditTotalPeriod, incomeDebitTotalPeriod, incomeCashTotalPeriod;
+    private float periodIncome;
+    private float periodPaymentType[] = new float[3];
     
     Financial_Data(){
         Date a, b;
@@ -43,6 +49,9 @@ public class Financial_Data extends Financial{
         this.financialEmployeeTotalPeriod = 0;
         this.financialSupplierTotalPeriod = 0;
 
+        periodPaymentType[0]= DatabaseManager.getValueCategory("FINANCIAL_SALES", "VALUE", "PAYMENT_TYPE", "CREDIT CARD", a, b);
+        periodPaymentType[1]= DatabaseManager.getValueCategory("FINANCIAL_SALES", "VALUE", "PAYMENT_TYPE", "DEBIT CARD", a, b);
+        periodPaymentType[2]= DatabaseManager.getValueCategory("FINANCIAL_SALES", "VALUE", "PAYMENT_TYPE", "CASH", a, b);
         
     }
 
@@ -93,7 +102,8 @@ public class Financial_Data extends Financial{
     }
   
     
-    //SCREEN 2: OVERVIEW
+    //SCREEN 2: OVERVIEW - BEFORE USE CALL  calculePeriodTypeExpense()
+    //PIE CHART
     public float getPercentagePeriodBuilding(){
         float aux = financialBuildingTotalPeriod * 100;
         return (aux/periodExpense);
@@ -130,9 +140,14 @@ public class Financial_Data extends Financial{
     }
     
     //SCREEN 2: BTN ADD EMPLOYEE
-    public void addEmployee(String category, int employeeID, float salary, int hourOverdue){
+    public void addEmployee(String employeeFirstName, String employeeLastName, int hourOverdue){
+        int employeeID = DatabaseManager.getIDperson("EMPLOYEE", employeeFirstName, employeeLastName);
         int size = DatabaseManager.getQuantLines("FINANCIAL_EMPLOYEE");
-         Financial_Employee b = new Financial_Employee(size+1, employeeID, salary, hourOverdue);
+        
+        ArrayList<Employee> list1 = DatabaseManager.LookupEmployee(employeeID, "ID");
+        float salary = list1.get(0).getSalary();
+        
+        Financial_Employee b = new Financial_Employee(size+1, employeeID, salary, hourOverdue);
         DatabaseManager.AddFinancialEmployee(b);
     }
     //SCREEN 2: BTN REMOVE EMPLOYEE
@@ -149,8 +164,12 @@ public class Financial_Data extends Financial{
     }
     
     //SCREEN 2: BTN ADD SUPPLIER
-    public void addSupplier(String category, int supplierID, Date dueDate, float value, int percentage){
+    public void addSupplier(String supplierName, Date dueDate, float value, int percentage){
         int size = DatabaseManager.getQuantLines("FINANCIAL_SUPPLIER");
+        
+        ArrayList<Supplier> list1 = DatabaseManager.LookupSupplier(supplierName, "NAME");
+        int supplierID= list1.get(0).getID();
+        
         Financial_Supplier b = new Financial_Supplier(size+1, supplierID, dueDate, value, percentage);
         DatabaseManager.AddFinancialSupplier(b);
     }
@@ -168,15 +187,69 @@ public class Financial_Data extends Financial{
     }
     
     
+    
+    
+
+    //SCREEN 3: OVERVIEW - BEFORE USE CALL calculePeriodCategoryIncome
+    public float getPercentagePeriodCreditIncome(){
+        float aux = incomeCreditTotalPeriod * 100;
+        return (aux/periodIncome);
+    } 
+    public float getPercentagePeriodDebitIncome(){
+        float aux = incomeDebitTotalPeriod * 100;
+        return (aux/periodIncome);
+    } 
+    public float getPercentagePeriodCashIncome(){
+        float aux = incomeCashTotalPeriod * 100;
+        return (aux/periodIncome);
+    } 
+    
+    //SCREEN 3: BTN ADD EMPLOYEE
+    public void addSales(String employeeFirstName, String employeeLastName, String clientFirstName, String clientLastName, String serviceName, String paymentType){
+        int employeeID = DatabaseManager.getIDperson("EMPLOYEE", employeeFirstName, employeeLastName);
+        int clientID = DatabaseManager.getIDperson("CLIENT", clientFirstName, clientLastName);
+        ArrayList<Service> list0 = DatabaseManager.LookupService(serviceName, "NAME");
+        int serviceID = list0.get(0).getID();
+        float value = list0.get(0).getValue();
+        
+        int size = DatabaseManager.getQuantLines("FINANCIAL_SALES");
+        
+        //Financial_Sales(int ID, int employeeID, int clientID, int serviceID, float value, String paymentType)        
+        Financial_Sales b = new Financial_Sales(size+1, employeeID, clientID, serviceID, value, paymentType);
+        DatabaseManager.AddFinancialSales(b);
+    }
+    //SCREEN 3: BTN REMOVE EMPLOYEE
+    public void removeSales(int ID){
+        ArrayList<Financial_Sales> list1 = DatabaseManager.LookupFinancialSales(ID, "ID");
+        DatabaseManager.RemoveFinancialSales(list1.get(0));
+    }
+    
+    //SCREEN 3: BTN UPDATE EMPLOYEE
+    public void upDateSales(int ID, Financial_Sales a){
+        ArrayList<Financial_Sales> list1 = DatabaseManager.LookupFinancialSales(ID, "ID");
+        a.setID(ID);
+        DatabaseManager.UpdateFinancialSales(list1.get(0), a);
+    }
+    
+
+    
+    
     ///////////////////////////////////////////////////////////////////////////
     /////                             AUX
     ///////////////////////////////////////////////////////////////////////////
     
-    public void calculePeriod(Date startPeriod, Date endPeriod){
+    public void calculePeriodTypeExpense(Date startPeriod, Date endPeriod){
         financialBuildingTotalPeriod = calculePeriodExpense("FINANCIAL_BUILDING", startPeriod, endPeriod);
         financialEmployeeTotalPeriod = calculePeriodExpense("FINANCIAL_EMPLOYEE", startPeriod, endPeriod);
         financialSupplierTotalPeriod = calculePeriodExpense("FINANCIAL_SUPPLIER", startPeriod, endPeriod);
         periodExpense = financialBuildingTotalPeriod + financialEmployeeTotalPeriod + financialSupplierTotalPeriod;
+    }
+    
+    public void calculePeriodCategoryIncome(Date startPeriod, Date endPeriod){
+        incomeCreditTotalPeriod = DatabaseManager.getValueCategory("FINANCIAL_SALES", "VALUE", "PAYMENT_TYPE", "CREDIT CARD", startPeriod, endPeriod);
+        incomeDebitTotalPeriod = DatabaseManager.getValueCategory("FINANCIAL_SALES", "VALUE", "PAYMENT_TYPE", "DEBIT CARD", startPeriod, endPeriod);
+        incomeCashTotalPeriod = DatabaseManager.getValueCategory("FINANCIAL_SALES", "VALUE", "PAYMENT_TYPE", "CASH", startPeriod, endPeriod);
+        periodIncome = incomeCreditTotalPeriod + incomeDebitTotalPeriod + incomeCashTotalPeriod;
     }
     
     private Date getStartMonthDay(){
