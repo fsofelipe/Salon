@@ -1,4 +1,4 @@
-package softeng;
+//package softeng;
 import java.text.*;
 import java.util.*;
 /**
@@ -12,13 +12,13 @@ public class Financial_Sales extends Financial {
     private float value;
     private String paymentType;
     public Financial_Sales(){}
-    public Financial_Sales(int employeeID, int clientID, int serviceID, float value, String paymentType){
+    public Financial_Sales(int ID, int employeeID, int clientID, int serviceID, float value, String paymentType){
         this.employeeID = employeeID;
         this.clientID = clientID;
         this.serviceID = serviceID;
         this.value = value;
         this.paymentType = paymentType;
-        this.ID = 1; 
+        this.ID = ID; 
         this.date = getTodaysDate();
         
     }

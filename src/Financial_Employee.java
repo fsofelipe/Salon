@@ -1,7 +1,7 @@
 /**
  * @author Felipe
  */
-package softeng;
+//package softeng;
 import java.text.*;
 import java.util.*;
 
@@ -13,8 +13,8 @@ public class Financial_Employee extends Financial{
     
     //CONSTRUCTOR
     public Financial_Employee(){}
-    public Financial_Employee(int employeeID, float salary, int hourOverdue){ 
-        this.ID = 1;
+    public Financial_Employee(int ID, int employeeID, float salary, int hourOverdue){ 
+        this.ID = ID;
         this.employeeID = employeeID;
         this.month = getTodaysDate().getMonth() + 1;
         this.year = getTodaysDate().getYear() + 1900;

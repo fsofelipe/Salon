@@ -1,7 +1,7 @@
 /**
  * @author Matthew Meyer
  */
-package softeng;
+//package softeng;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -220,13 +220,16 @@ public class DatabaseManager {
     public static void AddFinancialBuilding(Financial_Building product) {
         Add(product.toInsert(), FinancialBuildingTable); 
     }
+
     public static void RemoveFinancialBuilding(Financial_Building item) {
         Delete(item, FinancialBuildingTable);
     }
+    
     public static void UpdateFinancialBuilding(Financial_Building item, Financial_Building item2) {
         RemoveFinancialBuilding(item);
         AddFinancialBuilding(item2);
     }
+    
     
     //FINANCIAL EMPLOYEE
     public static ArrayList<Financial_Employee> LookupFinancialEmployee(int attr, String field) {
@@ -334,7 +337,41 @@ public class DatabaseManager {
     }
     //AUX
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public static int getQuantLines(String table){
+        int result = 0;
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:Salon.db");
+            c.setAutoCommit(false);
+            try {
+
+                stmt = c.createStatement();
+                
+                ResultSet rs = stmt.executeQuery("SELECT MAX(ID) FROM " + table);
+                    
+                while (rs.next()) {
+                    result+=rs.getFloat("MAX(ID)");
+                }
+
+
+                rs.close();
+                stmt.close();
+            } catch (SQLException E) {
+                E.printStackTrace();
+            }
+            c.close();
+        } catch (SQLException E) {
+            E.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return result;
+        
+        
+    }
+    
     public static float ValuePeriod (String table, String attribute, String attribute2, Date start, Date end){
         float result = 0;
         Connection c = null;
@@ -615,6 +652,18 @@ public class DatabaseManager {
         }
         else if (obj instanceof Inventory) {
             ID = Integer.toString(((Inventory) obj).getId());
+        }
+        else if (obj instanceof Financial_Building) {
+            ID = Integer.toString(((Financial_Building) obj).getID());
+        }
+        else if (obj instanceof Financial_Employee) {
+            ID = Integer.toString(((Financial_Employee) obj).getID());
+        }
+        else if (obj instanceof Financial_Supplier) {
+            ID = Integer.toString(((Financial_Supplier) obj).getID());
+        }
+        else if (obj instanceof Financial_Sales) {
+            ID = Integer.toString(((Financial_Sales) obj).getID());
         }
         if (ID.isEmpty()) return;
         Connection c = null;

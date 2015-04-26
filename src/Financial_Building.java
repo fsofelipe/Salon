@@ -1,4 +1,4 @@
-package softeng;
+//package softeng;
 
 import java.text.*;
 import java.util.*;
@@ -15,14 +15,15 @@ public class Financial_Building extends Financial{
  
     //CONTRUCTOR
     public Financial_Building (){}
-    public Financial_Building (String category, Date dateDue, float value, int percentage){
+    public Financial_Building (int ID, String category, Date dateDue, float value, int percentage){
         this.value = value;
-        valueOverdue = 1; 
+        valueOverdue = 0; 
         this.category = category;
         this.dateDue = dateDue;
         this.datePayment = getTodaysDate();
-        ID = 1;
+        this.ID = ID;
         this.percentage = percentage;
+        
         calculeOverdue();
         calculeValueTotal();
     }
